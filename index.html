@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Engine</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Rule Engine</h1>
+    
+    <h2>Create Rule</h2>
+    <form id="createRuleForm">
+        <input type="text" id="ruleName" placeholder="Rule Name" required>
+        <textarea id="ruleString" placeholder="Rule String" required rows="3" cols="50"></textarea>
+        <button type="submit">Create Rule</button>
+    </form>
+    <div id="createRuleResult"></div>
+
+    <h2>Evaluate Rules</h2>
+    <form id="evaluateForm">
+        <div id="ruleCheckboxes"></div>
+        <input type="number" id="age" placeholder="Age" required>
+        <input type="text" id="department" placeholder="Department" required>
+        <input type="number" id="salary" placeholder="Salary" required>
+        <input type="number" id="experience" placeholder="Experience" required>
+        <button type="submit">Evaluate</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        // Fetch and display rules
+        async function fetchRules() {
+            try {
+                const response = await axios.get('/api/rules');
+                const rules = response.data;
+                const checkboxes = document.getElementById('ruleCheckboxes');
+                checkboxes.innerHTML = '';
+                rules.forEach(rule => {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `rule_${rule[0]}`;
+                    checkbox.value = rule[0];
+                    const label = document.createElement('label');
+                    label.htmlFor = `rule_${rule[0]}`;
+                    label.textContent = `${rule[1]}: ${rule[2]}`;
+                    checkboxes.appendChild(checkbox);
+                    checkboxes.appendChild(label);
+                    checkboxes.appendChild(document.createElement('br'));
+                });
+            } catch (error) {
+                console.error('Error fetching rules:', error);
+            }
+        }
+
+        // Create rule
+        document.getElementById('createRuleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('ruleName').value;
+            const ruleString = document.getElementById('ruleString').value;
+            console.log("Attempting to create rule. Name:", name, "Rule:", ruleString);
+            try {
+                const response = await axios.post('/api/rules', { name, rule: ruleString });
+                console.log("Server response:", response.data);
+                document.getElementById('createRuleResult').textContent = 'Rule created successfully';
+                fetchRules();
+            } catch (error) {
+                console.error("Error creating rule:", error);
+                let errorMessage = "Unknown error occurred";
+                if (error.response) {
+                    console.error("Response data:", error.response.data);
+                    console.error("Response status:", error.response.status);
+                    console.error("Response headers:", error.response.headers);
+                    errorMessage = error.response.data.error || error.response.data.message || errorMessage;
+                } else if (error.request) {
+                    console.error("No response received:", error.request);
+                    errorMessage = "No response received from server";
+                } else {
+                    console.error("Error details:", error.message);
+                    errorMessage = error.message;
+                }
+                document.getElementById('createRuleResult').textContent = `Error creating rule: ${errorMessage}`;
+            }
+        });
+
+        // Evaluate rules
+        document.getElementById('evaluateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const selectedRules = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            const userData = {
+                age: parseInt(document.getElementById('age').value),
+                department: document.getElementById('department').value,
+                salary: parseInt(document.getElementById('salary').value),
+                experience: parseInt(document.getElementById('experience').value)
+            };
+            console.log("Selected rules:", selectedRules);
+            console.log("User data:", userData);
+            try {
+                const response = await axios.post('/api/evaluate', { rule_ids: selectedRules, user_data: userData });
+                console.log("Evaluation response:", response.data);
+                document.getElementById('result').textContent = `Evaluation result: ${response.data.result}`;
+            } catch (error) {
+                console.error('Error during evaluation:', error);
+                document.getElementById('result').textContent = `Error evaluating rules: ${error.response ? error.response.data.error : error.message}`;
+            }
+        });
+
+        // Validate rule string
+        function isValidRuleString(ruleString) {
+            console.log("Validating rule string:", ruleString);
+            // For now, always return true to bypass validation
+            return true;
+        }
+
+        // Initial fetch of rules
+        fetchRules();
+    </script>
+</body>
+</html>
