@@ -20,8 +20,8 @@ This project implements a simple 3-tier rule engine application using Abstract S
 
 1. Clone the repository:
    ```
-   git clone https://github.com/Vaibhavbasidoni/Initial-commit-of-Rule-Engine-with-AST.git
-   cd rule-engine-ast
+   git clone https://github.com/Sonikashankar/Rule-Engine-with-AST.git
+   cd Rule-Engine-with-AST
    ```
 
 2. Create a virtual environment and activate it:
