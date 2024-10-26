@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 # Rule Engine with AST
 
@@ -67,3 +68,6 @@ This project implements a simple 3-tier rule engine application using Abstract S
 - Error Handling: Comprehensive error handling and reporting for both frontend and backend operations.
 
 
+=======
+# Rule-Engine-with-AST
+>>>>>>> 2b3b18b2ebf3f85e1e527163809ed20cb0b6b021
